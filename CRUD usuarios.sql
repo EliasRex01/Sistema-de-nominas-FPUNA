@@ -124,15 +124,3 @@ BEGIN
   v_rol := fn_obtener_rol(:APP_USER);
   RETURN v_rol = 'Administrador';
 END;
-
--- Repite esto para los otros roles, cambiando la condición:
-Cliente: RETURN v_rol = 'Cliente';
-Gestor: RETURN v_rol = 'Gestor';
-
--- Aplicar las Autorizaciones en las Páginas
-Administrador: Permitir acceso a todas las páginas.
-Cliente: Aplicar restricción en páginas de creación/modificación de datos.
-Gestor: Aplicar restricciones según el nivel de acceso.
-
--- Para cada página o botón, ve a Security → Authorization Scheme
--- y selecciona el esquema correspondiente.
