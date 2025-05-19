@@ -114,4 +114,51 @@ END;
 
 
 
+PROMPT CREATE OR REPLACE FUNCTION fn_recurso
+CREATE OR REPLACE FUNCTION fn_recurso(
+  p_codigo IN adu_aplicacion.codigo%TYPE,
+  p_recurso IN adu_menu_recurso.recurso%TYPE
+) RETURN BOOLEAN IS
+  v_id_aplicacion adu_aplicacion.id_aplicacion%TYPE;
+  v_publico adu_aplicacion.publico%TYPE;
+BEGIN
+  BEGIN
+    SELECT id_aplicacion, publico
+    INTO v_id_aplicacion, v_publico
+    FROM adu_aplicacion
+    WHERE codigo = p_codigo;
+    Dbms_Output.Put_Line('v_id_aplicacion: ' ||v_id_aplicacion );
+
+    IF v_publico = 'N' THEN /* Verificamos si la aplicacion esta en modo publico para aplicar los controles de recursos */
+      RETURN TRUE;
+    END IF;
+
+  EXCEPTION
+    WHEN No_Data_Found THEN
+      RETURN FALSE;
+  END;
+
+  DECLARE
+    dummy CHAR(1);
+  BEGIN
+    SELECT 1
+    INTO dummy
+    FROM adu_menu_usuario  mu, adu_menu_recurso mr
+    WHERE Upper(mu.login) = Upper(fn_user)
+    AND mu.estado = 'A'
+    AND mu.id_menu = mr.id_menu
+    AND mr.id_aplicacion = v_id_aplicacion
+    AND mr.recurso = p_recurso;
+    Dbms_Output.Put_Line('v_recurso: ' || p_recurso );
+    RETURN TRUE;
+  EXCEPTION
+    WHEN No_Data_Found THEN
+      RETURN FALSE;
+  END;
+EXCEPTION
+  WHEN Others THEN
+    Raise_Application_Error(-20999,'Ocurrio un error al consultar la tabla de menu', TRUE);
+END;
+/
+
 
